@@ -1,0 +1,10 @@
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  phone VARCHAR(20),
+  avatar TEXT,
+  created_at TIMESTAMP  DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  deleted_at TIMESTAMP DEFAULT NULL
+);
