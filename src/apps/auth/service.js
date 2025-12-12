@@ -4,14 +4,19 @@ const { UserDB } = require("./db");
 const ErrorResponse = require("../../helper/errorResponse");
 
 class AuthService {
+  static async getById(data) {
+    const result = await UserDB.getById([data.id]);
+    return result;
+  }
+
   static async verifyPassword(plainPassword, hashedPassword) {
     return await bcrypt.compare(plainPassword, hashedPassword);
   }
 
   static async login(data) {
-    const { email, password } = data;
+    const { username, password } = data;
 
-    const user = await UserDB.getByEmail(email);
+    const user = await UserDB.getByUsername([username]);
     if (!user) {
       throw new ErrorResponse("auth.user_not_found", 404);
     }
