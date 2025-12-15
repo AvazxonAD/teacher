@@ -2,10 +2,10 @@ const express = require("express");
 
 const router = express.Router();
 
-// import routes
 const AuthRoutes = require("./auth/index");
+const ArticleRoutes = require("./article/index");
 
-// Auth routes
 router.use("/auth", AuthRoutes);
+router.use("/article", ArticleRoutes);
 
 module.exports = router;
