@@ -14,9 +14,26 @@ class ArticleDB {
   }
 
   static async findAll(params) {
-    // Basic implementation, can be expanded for pagination/filtering
-    const result = await db.query("SELECT * FROM articles WHERE deleted_at IS NULL ORDER BY created_at DESC");
-    return result;
+    const result = await db.query(`
+      WITH data AS (
+        SELECT 
+          * 
+        FROM articles 
+        WHERE deleted_at IS NULL 
+        ORDER BY created_at DESC
+        OFFSET $1 LIMIT $2
+      ),
+      total AS (
+        SELECT COUNT(id)::INTEGER as count FROM articles WHERE deleted_at IS NULL
+      )
+      SELECT 
+        (SELECT COALESCE(JSON_AGG(ROW_TO_JSON(data)), '[]') FROM data) AS data,
+        (SELECT count FROM total) AS count
+    `,
+      params
+    );
+
+    return result[0];
   }
 
   static async findById(params) {
