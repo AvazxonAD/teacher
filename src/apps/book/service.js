@@ -1,41 +1,43 @@
-const { ArticleDB } = require("./db");
+const { BookDB } = require("./db");
 const ErrorResponse = require("../../helper/errorResponse");
 const { PDFDocument } = require('pdf-lib');
 const fs = require('fs').promises;
 const path = require('path');
 const { HelperFunctions } = require('../../helper/functions')
 
-class ArticleService {
-    static async updateDownloadCount(data) {
-        await ArticleDB.updateDownloadCount([data.filename]);
-    }
-
-    static async updateViewsCount(data) {
-        await ArticleDB.updateViewsCount([data.id]);
-    }
-
+class BookService {
     static async returnPageCount(file) {
         const pdfBytes = await fs.readFile(path.join(__dirname, '../../../public/uploads', file));
         const pdfDoc = await PDFDocument.load(pdfBytes);
         return pdfDoc.getPageCount();
     }
 
-    static async create(data) {
-        const file = data.file ? data.file.filename : null;
-        let page_count;
+    static async updateDownloadCount(data) {
+        await BookDB.updateDownloadCount([data.filename]);
+    }
 
-        if (file) {
-            page_count = await this.returnPageCount(file);
+    static async create(data) {
+        if (!data.file) {
+            throw new ErrorResponse('book.file_not_found', 400);
         }
 
-        const result = await ArticleDB.create([
+        const file = data.file.filename;
+        let pages;
+
+        if (file) {
+            pages = await this.returnPageCount(file);
+        }
+
+
+        const result = await BookDB.create([
             data.title,
-            data.description,
             data.author,
-            data.read_time,
             data.category,
+            pages || 0,
+            data.rating || 0,
+            data.description,
+            data.is_bookmarked || false,
             file,
-            page_count
         ]);
         return result;
     }
@@ -43,7 +45,7 @@ class ArticleService {
     static async findAll(data) {
         const offset = (data.page - 1) * data.limit
 
-        const result = await ArticleDB.findAll([offset, data.limit]);
+        const result = await BookDB.findAll([offset, data.limit]);
 
         const meta = HelperFunctions.pagination({ ...data, count: result.count })
 
@@ -51,40 +53,41 @@ class ArticleService {
     }
 
     static async findById(data) {
-        const result = await ArticleDB.findById([data.id]);
+        const result = await BookDB.findById([data.id]);
         if (!result) {
-            throw new ErrorResponse("article.not_found", 404);
+            throw new ErrorResponse("book.not_found", 404);
         }
         return result;
     }
 
     static async update(data) {
-        const article = await this.findById(data);
-        const file = data.file ? data.file.filename : article.filename;
+        const book = await this.findById(data);
+        const file = data.file ? data.file.filename : book.filename;
 
-        let page_count;
+        let pages = data.pages || book.pages;
 
-        if (file) {
-            page_count = await this.returnPageCount(file);
+        if (data.file) {
+            pages = await this.returnPageCount(file);
         }
 
-        const result = await ArticleDB.update([
+        const result = await BookDB.update([
             data.id,
             data.title,
-            data.description,
             data.author,
-            data.read_time,
             data.category,
-            file,
-            page_count
+            pages,
+            data.rating,
+            data.description,
+            data.is_bookmarked,
+            file
         ]);
         return result;
     }
 
     static async delete(data) {
         await this.findById(data);
-        await ArticleDB.delete([data.id]);
+        await BookDB.delete([data.id]);
     }
 }
 
-module.exports = { ArticleService };
+module.exports = { BookService };

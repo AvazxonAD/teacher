@@ -13,6 +13,7 @@ class ArticleController {
 
     static async findById(req, res) {
         const result = await ArticleService.findById(req.params);
+        await ArticleService.updateViewsCount(req.params);
         return res.success(result, req.t("article.get_success"));
     }
 
