@@ -1,6 +1,7 @@
 const path = require('path');
 const { ArticleService } = require('../article/service');
 const { BookService } = require('../book/service');
+const { MethodicalService } = require('../methodical/service');
 
 exports.Controller = class {
     static async uploadFile(req, res) {
@@ -21,6 +22,7 @@ exports.Controller = class {
 
         await ArticleService.updateDownloadCount({ filename: file });
         await BookService.updateDownloadCount({ filename: file });
+        await MethodicalService.updateDownloadCount({ filename: file });
 
         res.download(path.join(__dirname, '../../../public/uploads', file), (err) => {
             if (err) {
