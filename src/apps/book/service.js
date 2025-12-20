@@ -17,11 +17,12 @@ class BookService {
     }
 
     static async create(data) {
-        if (!data.file) {
+        if (!data.files.pdf || !data.files.image) {
             throw new ErrorResponse('book.file_not_found', 400);
         }
 
-        const file = data.file.filename;
+        const file = data.files.pdf[0].filename;
+        const image = data.files.image[0].filename;
         let pages;
 
         if (file) {
@@ -38,6 +39,7 @@ class BookService {
             data.description,
             data.is_bookmarked || false,
             file,
+            image,
         ]);
         return result;
     }
@@ -62,11 +64,12 @@ class BookService {
 
     static async update(data) {
         const book = await this.findById(data);
-        const file = data.file ? data.file.filename : book.filename;
+        const file = data.files.pdf ? data.files.pdf[0].filename : book.filename;
+        const image = data.files.image ? data.files.image[0].filename : book.image_file;
 
         let pages = data.pages || book.pages;
 
-        if (data.file) {
+        if (data.files.pdf) {
             pages = await this.returnPageCount(file);
         }
 
@@ -79,7 +82,8 @@ class BookService {
             data.rating,
             data.description,
             data.is_bookmarked,
-            file
+            file,
+            image
         ]);
         return result;
     }

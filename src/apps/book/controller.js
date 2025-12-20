@@ -2,7 +2,7 @@ const { BookService } = require("./service");
 
 class BookController {
     static async create(req, res) {
-        const result = await BookService.create({ ...req.body, file: req.file });
+        const result = await BookService.create({ ...req.body, files: req.files });
         return res.success(result, req.t("book.create_success"));
     }
 
@@ -17,7 +17,7 @@ class BookController {
     }
 
     static async update(req, res) {
-        const result = await BookService.update({ ...req.params, ...req.body, file: req.file });
+        const result = await BookService.update({ ...req.params, ...req.body, files: req.files });
         return res.success(result, req.t("book.update_success"));
     }
 
