@@ -5,6 +5,7 @@ const mime = require('mime-types');
 const fs = require('fs/promises');
 const { MethodicalService } = require('../methodical/service');
 
+
 exports.Controller = class {
     static async uploadFile(req, res) {
         try {
@@ -21,7 +22,11 @@ exports.Controller = class {
 
     static async getFile(req, res) {
         const file = req.query.filename;
-        const path = path.join(__dirname, '../../public/uploads', file);
+        const file_path = path.join(__dirname, '../../public/uploads', file);
+
+        if (!fs.existsSync(file_path)) {
+            return res.error(req.i18n.t("file.not_found"), 404);
+        }
 
         await ArticleService.updateDownloadCount({ filename: file });
         await BookService.updateDownloadCount({ filename: file });
@@ -29,7 +34,7 @@ exports.Controller = class {
 
         const content_type = mime.lookup(file);
 
-        const fileRes = await fs.readFile(path);
+        const fileRes = await fs.readFile(file_path);
 
         res.set('Content-Type', content_type);
 
