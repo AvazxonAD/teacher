@@ -1,6 +1,8 @@
 const path = require('path');
 const { ArticleService } = require('../article/service');
 const { BookService } = require('../book/service');
+const mime = require('mime-types');
+const fs = require('fs/promises');
 
 exports.Controller = class {
     static async uploadFile(req, res) {
@@ -21,12 +23,14 @@ exports.Controller = class {
 
         await ArticleService.updateDownloadCount({ filename: file });
         await BookService.updateDownloadCount({ filename: file });
+        const path = path.join(__dirname, '../../../public/uploads', file);
 
-        res.download(path.join(__dirname, '../../../public/uploads', file), (err) => {
-            if (err) {
-                console.error("Error downloading file:", err);
-                res.error(req.i18n.t("file.download_error"), 500);
-            }
-        });
+        const content_type = mime.lookup(file);
+
+        const fileRes = await fs.readFile(path);
+
+        res.set('Content-Type', content_type);
+
+        return res.send(fileRes)
     }
 };
