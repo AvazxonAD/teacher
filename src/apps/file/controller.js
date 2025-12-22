@@ -24,7 +24,9 @@ exports.Controller = class {
         const file = req.query.filename;
         const file_path = path.join(__dirname, '../../public/uploads', file);
 
-        if (!fs.existsSync(file_path)) {
+        try {
+            await fs.access(file_path);
+        } catch (error) {
             return res.error(req.i18n.t("file.not_found"), 404);
         }
 
