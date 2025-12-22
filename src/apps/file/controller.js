@@ -22,7 +22,7 @@ exports.Controller = class {
 
     static async getFile(req, res) {
         const file = req.query.filename;
-        const file_path = path.join(__dirname, '../../public/uploads', file);
+        const file_path = path.join(__dirname, '../../../public/uploads', file);
 
         try {
             await fs.access(file_path);
