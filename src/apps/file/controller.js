@@ -3,6 +3,7 @@ const { ArticleService } = require('../article/service');
 const { BookService } = require('../book/service');
 const mime = require('mime-types');
 const fs = require('fs/promises');
+const { MethodicalService } = require('../methodical/service');
 
 exports.Controller = class {
     static async uploadFile(req, res) {
@@ -20,10 +21,11 @@ exports.Controller = class {
 
     static async getFile(req, res) {
         const file = req.query.filename;
+        const path = path.join(__dirname, '../../public/uploads', file);
 
         await ArticleService.updateDownloadCount({ filename: file });
         await BookService.updateDownloadCount({ filename: file });
-        const path = path.join(__dirname, '../../../public/uploads', file);
+        await MethodicalService.updateDownloadCount({ filename: file });
 
         const content_type = mime.lookup(file);
 

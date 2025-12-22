@@ -60,5 +60,5 @@ exports.uploadImage = (folder) => {
 
 exports.multiUpload = multer({
   storage: multiUploadStorage,
-  limits: { fileSize: 104857600 },
+  limits: { fileSize: 104857600000 },
 });

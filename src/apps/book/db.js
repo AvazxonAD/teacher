@@ -17,8 +17,8 @@ class BookDB {
   static async create(params) {
     const result = await db.query(
       `--sql
-      INSERT INTO books(title, author, category, pages, rating, description, is_bookmarked, pdf_url, created_at, updated_at) 
-      VALUES($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())  
+      INSERT INTO books(title, author, category, pages, rating, description, is_bookmarked, pdf_url, image, created_at, updated_at) 
+      VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())  
       RETURNING *
     `,
       params
@@ -31,7 +31,8 @@ class BookDB {
       WITH data AS (
         SELECT 
           *,
-          '${process.env.BASE_URL}/file/download?filename=' || pdf_url as pdf_url 
+          '${process.env.BASE_URL}/file/download?filename=' || pdf_url as pdf_url,
+          '${process.env.BASE_URL}/file/download?filename=' || image as image 
         FROM books 
         WHERE deleted_at IS NULL 
         ORDER BY created_at DESC
@@ -51,7 +52,17 @@ class BookDB {
   }
 
   static async findById(params) {
-    const result = await db.query(`SELECT *, pdf_url AS filename, '${process.env.BASE_URL}/file/download?filename=' || pdf_url as pdf_url FROM books WHERE id = $1 AND deleted_at IS NULL`, params);
+    const result = await db.query(`
+      SELECT 
+        *,
+        pdf_url AS filename,
+        image AS image_file,
+        '${process.env.BASE_URL}/file/download?filename=' || pdf_url as pdf_url,
+        '${process.env.BASE_URL}/file/download?filename=' || image as image 
+      FROM books
+      WHERE id = $1
+        AND deleted_at IS NULL
+    `, params);
     return result[0];
   }
 
@@ -68,6 +79,7 @@ class BookDB {
         description = $7,
         is_bookmarked = $8,
         pdf_url = $9,
+        image = $10,
         updated_at = now()
       WHERE id = $1
       RETURNING *
