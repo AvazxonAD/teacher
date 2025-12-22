@@ -27,6 +27,7 @@ exports.Controller = class {
         try {
             await fs.access(file_path);
         } catch (error) {
+            console.error("File not found:", file_path);
             return res.error(req.i18n.t("file.not_found"), 404);
         }
 
